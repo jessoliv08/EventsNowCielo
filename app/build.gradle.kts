@@ -136,6 +136,8 @@ dependencies {
     // Tests
     testImplementation(libs.junit)
     testImplementation("io.mockk:mockk:1.13.10")
+    testImplementation(libs.kotlinx.coroutine.test)
+    testImplementation(libs.turbine)
     testImplementation(libs.okhttp.mockwebserver.junit4)
 
     // Android Tests
