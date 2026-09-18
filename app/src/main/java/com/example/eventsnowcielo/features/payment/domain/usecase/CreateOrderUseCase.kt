@@ -1,14 +1,7 @@
 package com.example.eventsnowcielo.features.payment.domain.usecase
 
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
-import com.example.eventsnowcielo.features.payment.data.repository.PaymentRepositoryImpl
-import org.koin.core.annotation.Single
 
-@Single
-class CreateOrderUseCase(
-    private val repository: PaymentRepositoryImpl
-) {
-    suspend operator fun invoke(amount: Int, priceInCents: Long): Result<OrderModel?> {
-        return repository.createOrder(amount, priceInCents)
-    }
+interface CreateOrderUseCase {
+    suspend operator fun invoke(amount: Int, priceInCents: Long): Result<OrderModel?>
 }
