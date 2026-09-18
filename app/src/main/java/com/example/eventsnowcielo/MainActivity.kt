@@ -8,14 +8,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.eventsnowcielo.core.ui.theme.EventsNowCieloTheme
-import com.example.eventsnowcielo.features.payment.ui.PaymentScreen
+import com.example.eventsnowcielo.navigation.AppNavHost
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             EventsNowCieloTheme {
-                PaymentScreen()
+                AppNavHost()
             }
         }
     }
