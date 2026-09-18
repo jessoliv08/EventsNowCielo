@@ -1,22 +1,21 @@
 package com.example.eventsnowcielo
 
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import com.example.eventsnowcielo.core.ui.theme.EventsNowCieloTheme
-import com.example.eventsnowcielo.features.payment.ui.PaymentScreen
+import com.example.eventsnowcielo.core.di.AppModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
+import org.koin.ksp.generated.module
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            EventsNowCieloTheme {
-                PaymentScreen()
-            }
+class EventsNowCieloApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        startKoin {
+            androidContext(this@EventsNowCieloApplication)
+            modules(AppModule().module)
         }
     }
 

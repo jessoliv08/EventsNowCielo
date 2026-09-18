@@ -2,7 +2,7 @@
 activityCompose = "1.9.3"
 agp = "8.4.2"
 coil = "2.6.0"
-composeBom = "2024.12.01"
+composeBom = "2024.09.03"
 coreKtx = "1.15.0"
 espressoCore = "3.6.1"
 junit = "4.13.2"
@@ -15,9 +15,9 @@ okhttp = "5.0.0-alpha.14"
 retrofit = "2.11.0"
 mockkVersion = "1.13.14"
 roomKtx = "2.8.3"
-koin = "4.1.1"
 koin-annotations = "2.1.0"
-koin-bom = "4.1.1"
+koin = "4.0.0"
+koin-bom = "4.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -57,7 +57,7 @@ turbine = { module = "app.cash.turbine:turbine", version = "1.2.0" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
-koin-compose = { module = "io.insert-koin:koin-androidx-compose",  version.ref = "koin-bom" }
+koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin-bom" }
 koin-core = { module = "io.insert-koin:koin-core" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotations" }

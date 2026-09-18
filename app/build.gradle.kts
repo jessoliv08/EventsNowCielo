@@ -65,9 +65,15 @@ android {
     }
 }
 
+configurations.all {
+    exclude(group = "com.android.support")
+}
+
 dependencies {
     // 1. Cielo Local AARs & JARs
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+    implementation(files("libs/order-manager-2.7.2.aar"))
+    implementation(files("libs/event-tracker-1.0.1.aar"))
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     // 2. Cielo LIO Transitive Dependencies
     implementation("com.journeyapps:zxing-android-embedded:3.5.0")
@@ -106,6 +112,10 @@ dependencies {
     // AndroidX & Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.kotlinx.coroutine.android)
+    implementation(libs.kotlinx.coroutine.core)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -135,4 +145,5 @@ dependencies {
 // Compile time check for Koin Annotations
 ksp {
     arg("KOIN_CONFIG_CHECK", "true")
+    arg("KOIN_ANDROID_SDK", "true")
 }
