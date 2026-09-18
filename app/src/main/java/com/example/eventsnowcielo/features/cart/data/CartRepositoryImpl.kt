@@ -1,21 +1,53 @@
 package com.example.eventsnowcielo.features.cart.data
 
+import com.example.eventsnowcielo.core.database.cart.CartDao
 import com.example.eventsnowcielo.features.cart.domain.model.CartItem
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
+import com.example.eventsnowcielo.features.events.domain.model.Event
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 
 @Single(binds = [CartRepository::class])
-class CartRepositoryImpl : CartRepository {
+class CartRepositoryImpl(
+    private val cartDao: CartDao
+) : CartRepository {
 
-    private val items = mutableListOf<CartItem>()
+    override val cartItems: Flow<List<CartItem>> = cartDao.getCartItems()
+        .map { entities -> entities.map { it.toDomain() } }
 
-    override suspend fun addItem(item: CartItem) {
-        val existingIndex = items.indexOfFirst { it.eventId == item.eventId }
-        if (existingIndex >= 0) {
-            val existing = items[existingIndex]
-            items[existingIndex] = existing.copy(quantity = existing.quantity + item.quantity)
+    override suspend fun addToCart(event: Event, quantity: Int) {
+        if (quantity <= 0) return
+
+        val existingItem = cartDao.getItemByEventId(event.id)
+        if (existingItem != null) {
+            cartDao.insertOrUpdateItem(
+                existingItem.copy(quantity = existingItem.quantity + quantity)
+            )
         } else {
-            items.add(item)
+            cartDao.insertOrUpdateItem(event.toCartItemEntity(quantity))
         }
+    }
+
+    override suspend fun removeFromCart(eventId: String) {
+        cartDao.deleteItem(eventId)
+    }
+
+    override suspend fun updateQuantity(eventId: String, quantity: Int) {
+        if (quantity <= 0) {
+            removeFromCart(eventId)
+            return
+        }
+
+        val existingItem = cartDao.getItemByEventId(eventId) ?: return
+        cartDao.insertOrUpdateItem(existingItem.copy(quantity = quantity))
+    }
+
+    override suspend fun clearCart() {
+        cartDao.clearCart()
+    }
+
+    override suspend fun getCart(): List<CartItem> {
+        return cartDao.getCartItemsSnapshot().map { it.toDomain() }
     }
 }

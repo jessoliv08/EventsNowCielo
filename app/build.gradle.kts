@@ -91,13 +91,9 @@ dependencies {
     implementation("com.datadoghq:dd-sdk-android-trace:2.16.0")
     implementation("com.datadoghq:dd-sdk-android-rum:2.16.0")
 
-    // 4. Koin Dependency Injection
-    implementation(project.dependencies.platform(libs.koin.bom))
-    implementation(libs.koin.core)
-    implementation(libs.koin.android)
-    implementation(libs.koin.compose)
-    implementation(libs.koin.annotations)
-    ksp(libs.koin.ksp)
+    // Room
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Moshi & KSP
     implementation(libs.moshi)
@@ -128,6 +124,14 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
+
+    // 4. Koin Dependency Injection
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.annotations)
+    ksp(libs.koin.ksp)
 
     // Tests
     testImplementation(libs.junit)

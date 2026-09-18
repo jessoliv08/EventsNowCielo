@@ -10,5 +10,6 @@ data class PaymentUiState(
     val createdOrder: OrderModel? = null,
     val isLoading: Boolean = false,
     val paymentStatusMessage: String? = null,
-    val paymentStatusIconMessage: ImageVector? = null
+    val paymentStatusIconMessage: ImageVector? = null,
+    val checkoutTotalInCents: Long? = null
 )

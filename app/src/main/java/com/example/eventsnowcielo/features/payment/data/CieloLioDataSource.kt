@@ -4,6 +4,7 @@ import cielo.orders.domain.CheckoutRequest
 import cielo.sdk.order.payment.PaymentCode
 import cielo.sdk.order.payment.PaymentError
 import cielo.sdk.order.payment.PaymentListener
+import com.example.eventsnowcielo.features.cart.domain.model.CartItem
 import com.example.eventsnowcielo.features.payment.data.repository.toOrderItemModel
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import kotlinx.coroutines.channels.awaitClose
@@ -26,6 +27,34 @@ class CieloLioDataSource(
     suspend fun ensureBound() {
         connector.initialize()
         connector.bind()
+    }
+
+    suspend fun createDraftOrderFromCart(cartItems: List<CartItem>): OrderModel? {
+        if (cartItems.isEmpty()) return null
+
+        ensureBound()
+
+        val orderManager = connector.getOrderManager()
+        val referenceId = UUID.randomUUID().toString()
+        return orderManager.createDraftOrder(referenceId)?.let { order ->
+            cartItems.forEach { cartItem ->
+                order.addItem(
+                    cartItem.event.id,
+                    cartItem.event.title,
+                    cartItem.event.priceInCents,
+                    cartItem.quantity,
+                    UNIT_OF_MEASURE
+                )
+            }
+
+            orderManager.placeOrder(order)
+
+            OrderModel(
+                id = order.id,
+                referenceId = referenceId,
+                items = order.items.map { it.toOrderItemModel() }
+            )
+        }
     }
 
     suspend fun createDraftOrder(quantity: Int, unitPriceInCents: Long): OrderModel? {

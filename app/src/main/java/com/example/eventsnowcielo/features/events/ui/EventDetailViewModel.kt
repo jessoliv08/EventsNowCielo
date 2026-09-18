@@ -2,7 +2,6 @@ package com.example.eventsnowcielo.features.events.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eventsnowcielo.features.cart.domain.model.CartItem
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
 import com.example.eventsnowcielo.features.events.domain.usecase.GetEventByIdUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,21 +51,13 @@ class EventDetailViewModel(
         }
     }
 
-    fun addToCart() {
+    fun addToCart(onAdded: () -> Unit = {}) {
         val state = _uiState.value
         val event = state.event ?: return
         if (state.quantity <= 0) return
 
         viewModelScope.launch {
-            cartRepository.addItem(
-                CartItem(
-                    eventId = event.id,
-                    title = event.title,
-                    imageUrl = event.imageUrl,
-                    priceInCents = event.priceInCents,
-                    quantity = state.quantity
-                )
-            )
+            cartRepository.addToCart(event, state.quantity)
 
             _uiState.update {
                 it.copy(
@@ -74,6 +65,8 @@ class EventDetailViewModel(
                     quantity = 0
                 )
             }
+
+            onAdded()
         }
     }
 

@@ -1,9 +1,11 @@
 package com.example.eventsnowcielo.features.cart.domain.model
 
+import com.example.eventsnowcielo.features.events.domain.model.Event
+
 data class CartItem(
-    val eventId: String,
-    val title: String,
-    val imageUrl: String,
-    val priceInCents: Long,
+    val event: Event,
     val quantity: Int
-)
+) {
+    val lineTotalInCents: Long
+        get() = event.priceInCents * quantity
+}

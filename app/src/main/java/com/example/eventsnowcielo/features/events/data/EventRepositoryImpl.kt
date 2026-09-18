@@ -1,16 +1,17 @@
 package com.example.eventsnowcielo.features.events.data
 
 import com.example.eventsnowcielo.features.events.domain.model.Event
+import com.example.eventsnowcielo.features.events.domain.repository.EventRepository
 import org.koin.core.annotation.Single
 
-@Single
-class EventRepository(
+@Single(binds = [EventRepository::class])
+class EventRepositoryImpl(
     private val remoteDataSource: EventRemoteDataSource
-) {
+): EventRepository {
 
     private var cachedEvents: List<Event>? = null
 
-    suspend fun getEvents(): Result<List<Event>> {
+    override suspend fun getEvents(): Result<List<Event>> {
         return runCatching {
             val events = remoteDataSource.fetchEvents()
             cachedEvents = events
@@ -18,7 +19,7 @@ class EventRepository(
         }
     }
 
-    suspend fun getEventById(eventId: String): Result<Event> {
+    override suspend fun getEventById(eventId: String): Result<Event> {
         return runCatching {
             val events = cachedEvents ?: remoteDataSource.fetchEvents().also { cachedEvents = it }
             events.first { it.id == eventId }

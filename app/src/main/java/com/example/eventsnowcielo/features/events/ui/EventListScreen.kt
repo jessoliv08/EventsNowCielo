@@ -7,13 +7,21 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -29,13 +37,51 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun EventListScreen(
     onEventClick: (String) -> Unit,
+    onCartClick: () -> Unit,
     viewModel: EventListViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val cartItemCount by viewModel.cartItemCount.collectAsState()
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Events Now") })
+            TopAppBar(
+                title = { Text("Events Now") },
+                actions = {
+                    IconButton(onClick = onCartClick) {
+                        if (cartItemCount > 0) {
+                            BadgedBox(
+                                badge = {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(18.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = cartItemCount.toString(),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onError,
+                                                modifier = Modifier.padding(2.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = "Open cart"
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Open cart"
+                            )
+                        }
+                    }
+                }
+            )
         }
     ) { padding ->
         when (val state = uiState) {

@@ -16,7 +16,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,12 +24,15 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -49,12 +51,21 @@ fun EventDetailScreen(
     viewModel: EventDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(eventId) {
         viewModel.loadEvent(eventId)
     }
 
+    LaunchedEffect(uiState.addedToCartMessage) {
+        uiState.addedToCartMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.dismissAddedToCartMessage()
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(uiState.event?.title ?: "Event Details") },
@@ -108,7 +119,6 @@ fun EventDetailScreen(
             uiState.event != null -> {
                 EventDetailContent(
                     event = uiState.event!!,
-                    addedToCartMessage = uiState.addedToCartMessage,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
@@ -121,7 +131,6 @@ fun EventDetailScreen(
 @Composable
 private fun EventDetailContent(
     event: com.example.eventsnowcielo.features.events.domain.model.Event,
-    addedToCartMessage: String?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -166,15 +175,6 @@ private fun EventDetailContent(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            addedToCartMessage?.let { message ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = message,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
         }
     }
 }

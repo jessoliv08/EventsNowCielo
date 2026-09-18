@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -18,13 +19,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,31 +38,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.eventsnowcielo.core.ui.util.formatPriceInCents
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentType
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(
+    onBackClick: () -> Unit = {},
     viewModel: PaymentViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val isCartCheckout = state.checkoutTotalInCents != null
 
     Scaffold(
         topBar = {
-            // Standard non-experimental Header
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Cielo LIO Checkout",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
+            TopAppBar(
+                title = { Text("Cielo LIO Checkout") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
         }
-    ){ padding ->
+    ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -72,7 +78,6 @@ fun PaymentScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Section 1: Merchant & Inputs
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -96,59 +101,63 @@ fun PaymentScreen(
                             singleLine = true
                         )
 
-                        // Quantity Selector
-                        var qtyExpanded by remember { mutableStateOf(false) }
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            OutlinedButton(
-                                onClick = { qtyExpanded = true },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = MaterialTheme.shapes.extraSmall
-                            ) {
-                                Row(
+                        if (!isCartCheckout) {
+                            var qtyExpanded by remember { mutableStateOf(false) }
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                OutlinedButton(
+                                    onClick = { qtyExpanded = true },
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                    shape = MaterialTheme.shapes.extraSmall
                                 ) {
-                                    Text("Quantity: ${state.selectedQuantity}")
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowDropDown,
-                                        contentDescription = "Select Quantity"
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("Quantity: ${state.selectedQuantity}")
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowDropDown,
+                                            contentDescription = "Select Quantity"
+                                        )
+                                    }
+                                }
+
+                                DropdownMenu(
+                                    expanded = qtyExpanded,
+                                    onDismissRequest = { qtyExpanded = false },
+                                    modifier = Modifier.fillMaxWidth(0.8f)
+                                ) {
+                                    (1..10).forEach { qty ->
+                                        DropdownMenuItem(
+                                            text = { Text("$qty") },
+                                            onClick = {
+                                                viewModel.onQuantitySelected(qty)
+                                                qtyExpanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
 
-                            DropdownMenu(
-                                expanded = qtyExpanded,
-                                onDismissRequest = { qtyExpanded = false },
-                                modifier = Modifier.fillMaxWidth(0.8f)
+                            Button(
+                                onClick = { viewModel.createOrder() },
+                                enabled = !state.isLoading && state.createdOrder == null,
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                (1..10).forEach { qty ->
-                                    DropdownMenuItem(
-                                        text = { Text("$qty") },
-                                        onClick = {
-                                            viewModel.onQuantitySelected(qty)
-                                            qtyExpanded = false
-                                        }
-                                    )
-                                }
+                                Text("Create Order")
                             }
-                        }
-
-                        Button(
-                            onClick = { viewModel.createOrder() },
-                            enabled = !state.isLoading && state.createdOrder == null,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Create Order")
                         }
                     }
                 }
 
-                // Section 2: Payment Execution
                 state.createdOrder?.let { order ->
+                    val displayTotal = state.checkoutTotalInCents ?: order.totalAmountInCents
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -156,10 +165,11 @@ fun PaymentScreen(
                         ) {
                             Text("Active Order", style = MaterialTheme.typography.titleMedium)
                             Text("Order ID: ${order.id}")
-                            Text("Quantity: ${order.items.sumOf { it.quantity }}")
-                            Text("Total Amount: R$ ${"%.2f".format(order.totalAmountInCents / 100.0)}")
+                            if (!isCartCheckout) {
+                                Text("Quantity: ${order.items.sumOf { it.quantity }}")
+                            }
+                            Text("Total Amount: ${formatPriceInCents(displayTotal)}")
 
-                            // Payment Type Selector
                             var payExpanded by remember { mutableStateOf(false) }
                             Box(modifier = Modifier.fillMaxWidth()) {
                                 OutlinedButton(
@@ -208,7 +218,7 @@ fun PaymentScreen(
                     }
                 }
             }
-            // Section 3: Status Feedback
+
             state.paymentStatusMessage?.let { message ->
                 Dialog(onDismissRequest = viewModel::dismiss) {
                     Card(
@@ -246,7 +256,6 @@ fun PaymentScreen(
                 }
             }
 
-            // Loading Overlay
             if (state.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)

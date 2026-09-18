@@ -2,9 +2,12 @@ package com.example.eventsnowcielo.features.payment.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
 import com.example.eventsnowcielo.features.payment.data.PaymentResult
+import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentType
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentUiState
+import com.example.eventsnowcielo.features.payment.domain.usecase.CompleteOrderUseCase
 import com.example.eventsnowcielo.features.payment.domain.usecase.CreateOrderUseCase
 import com.example.eventsnowcielo.features.payment.domain.usecase.ProcessPaymentUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +20,9 @@ import org.koin.android.annotation.KoinViewModel
 @KoinViewModel
 class PaymentViewModel(
     private val createOrderUseCase: CreateOrderUseCase,
-    private val processPaymentUseCase: ProcessPaymentUseCase
+    private val processPaymentUseCase: ProcessPaymentUseCase,
+    private val completeOrderUseCase: CompleteOrderUseCase,
+    private val cartRepository: CartRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PaymentUiState())
@@ -37,6 +42,22 @@ class PaymentViewModel(
 
     fun onPaymentTypeSelected(paymentType: PaymentType) {
         _uiState.update { it.copy(selectedPaymentType = paymentType) }
+    }
+
+    fun initializeWithExistingOrder(orderId: String, totalInCents: Long) {
+        _uiState.update {
+            it.copy(
+                createdOrder = OrderModel(
+                    id = orderId,
+                    referenceId = orderId,
+                    items = emptyList()
+                ),
+                checkoutTotalInCents = totalInCents,
+                isLoading = false,
+                paymentStatusMessage = null,
+                paymentStatusIconMessage = null
+            )
+        }
     }
 
     fun createOrder(priceInCents: Long = DEFAULT_UNIT_PRICE_IN_CENTS) {
@@ -69,7 +90,8 @@ class PaymentViewModel(
                 createdOrder = null,
                 isLoading = false,
                 paymentStatusMessage = null,
-                paymentStatusIconMessage = null
+                paymentStatusIconMessage = null,
+                checkoutTotalInCents = null
             )
         }
     }
@@ -96,6 +118,9 @@ class PaymentViewModel(
                     }
 
                     is PaymentResult.Success -> {
+                        completeOrderUseCase(order.id, status.transactionId)
+                        cartRepository.clearCart()
+
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
