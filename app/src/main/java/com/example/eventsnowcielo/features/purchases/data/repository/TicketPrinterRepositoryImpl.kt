@@ -1,25 +1,25 @@
-package com.example.eventsnowcielo.features.purchases.data
+package com.example.eventsnowcielo.features.purchases.data.repository
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.util.Log
 import cielo.sdk.order.PrinterListener
 import cielo.sdk.printer.PrinterManager
 import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
+import com.example.eventsnowcielo.features.purchases.domain.repository.TicketPrinterRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
 
-@Single
-class TicketPrinterManager(context: Context) {
+@Single(binds = [TicketPrinterRepository::class])
+class TicketPrinterRepositoryImpl(context: Context): TicketPrinterRepository {
 
     private val printerManager: PrinterManager by lazy { PrinterManager(context.applicationContext) }
 
     private val _printState = MutableStateFlow<PrintResult?>(null)
-    val printState: StateFlow<PrintResult?> = _printState.asStateFlow()
+    override val printState: StateFlow<PrintResult?> = _printState.asStateFlow()
 
-    fun printTicket(information: String, alignCenter: HashMap<String, Int>) {
+    override fun printTicket(information: String, alignCenter: HashMap<String, Int>) {
         _printState.value = PrintResult.InProgress()
 
         val printerListener = object : PrinterListener {
@@ -47,7 +47,7 @@ class TicketPrinterManager(context: Context) {
         }
     }
 
-    fun dismissResult() {
+    override fun dismissResult() {
         _printState.value = null
     }
 }

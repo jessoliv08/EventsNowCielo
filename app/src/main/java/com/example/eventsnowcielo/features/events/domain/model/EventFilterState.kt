@@ -1,4 +1,4 @@
-package com.example.eventsnowcielo.features.events.ui
+package com.example.eventsnowcielo.features.events.domain.model
 
 import java.time.LocalDate
 

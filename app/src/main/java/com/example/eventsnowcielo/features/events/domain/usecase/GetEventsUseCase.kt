@@ -2,7 +2,7 @@ package com.example.eventsnowcielo.features.events.domain.usecase
 
 import com.example.eventsnowcielo.features.events.domain.model.Category
 import com.example.eventsnowcielo.features.events.domain.model.Event
-import com.example.eventsnowcielo.features.events.ui.EventFilterState
+import com.example.eventsnowcielo.features.events.domain.model.EventFilterState
 import java.time.LocalDate
 
 interface GetEventsUseCase {

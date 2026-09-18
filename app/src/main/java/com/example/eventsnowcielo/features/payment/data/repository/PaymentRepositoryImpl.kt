@@ -3,8 +3,8 @@ package com.example.eventsnowcielo.features.payment.data.repository
 import com.example.eventsnowcielo.core.database.orders.OrderDao
 import com.example.eventsnowcielo.core.database.orders.OrderEntity
 import com.example.eventsnowcielo.features.cart.domain.model.CartItem
-import com.example.eventsnowcielo.features.payment.data.CieloLioDataSource
-import com.example.eventsnowcielo.features.payment.data.PaymentResult
+import com.example.eventsnowcielo.features.payment.data.source.CieloLioDataSource
+import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import com.example.eventsnowcielo.features.payment.domain.repository.PaymentRepository
 import kotlinx.coroutines.flow.Flow

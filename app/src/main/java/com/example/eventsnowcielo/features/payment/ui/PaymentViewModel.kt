@@ -3,7 +3,7 @@ package com.example.eventsnowcielo.features.payment.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
-import com.example.eventsnowcielo.features.payment.data.PaymentResult
+import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentType
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentUiState

@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.eventsnowcielo.features.events.domain.model.EventListUiState
+import com.example.eventsnowcielo.features.events.ui.viewmodel.EventListViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 

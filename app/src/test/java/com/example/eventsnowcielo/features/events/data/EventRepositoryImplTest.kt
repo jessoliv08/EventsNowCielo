@@ -1,5 +1,7 @@
 package com.example.eventsnowcielo.features.events.data
 
+import com.example.eventsnowcielo.features.events.data.repository.EventRepositoryImpl
+import com.example.eventsnowcielo.features.events.data.source.EventRemoteDataSource
 import com.example.eventsnowcielo.features.events.domain.model.Category
 import com.example.eventsnowcielo.features.events.domain.model.Event
 import io.mockk.coEvery

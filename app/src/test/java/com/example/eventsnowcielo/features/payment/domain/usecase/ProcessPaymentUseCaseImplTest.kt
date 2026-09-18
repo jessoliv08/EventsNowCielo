@@ -1,7 +1,7 @@
 package com.example.eventsnowcielo.features.payment.domain.usecase
 
 import app.cash.turbine.test
-import com.example.eventsnowcielo.features.payment.data.PaymentResult
+import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.data.repository.PaymentRepositoryImpl
 import io.mockk.every
 import io.mockk.mockk

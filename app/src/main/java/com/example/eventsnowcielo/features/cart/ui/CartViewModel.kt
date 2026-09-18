@@ -2,6 +2,7 @@ package com.example.eventsnowcielo.features.cart.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.eventsnowcielo.features.cart.domain.model.CartUiState
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
 import com.example.eventsnowcielo.features.payment.domain.usecase.CreateOrderFromCartUseCase
 import kotlinx.coroutines.flow.MutableStateFlow

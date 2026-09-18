@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.eventsnowcielo.core.ui.util.formatPriceInCents
+import com.example.eventsnowcielo.features.events.ui.viewmodel.EventDetailViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

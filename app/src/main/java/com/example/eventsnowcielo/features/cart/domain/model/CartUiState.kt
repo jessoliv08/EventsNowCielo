@@ -1,6 +1,4 @@
-package com.example.eventsnowcielo.features.cart.ui
-
-import com.example.eventsnowcielo.features.cart.domain.model.CartItem
+package com.example.eventsnowcielo.features.cart.domain.model
 
 data class CartUiState(
     val items: List<CartItem> = emptyList(),

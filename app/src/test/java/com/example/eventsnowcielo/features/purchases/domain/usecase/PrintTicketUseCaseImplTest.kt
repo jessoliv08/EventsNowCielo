@@ -1,6 +1,6 @@
 package com.example.eventsnowcielo.features.purchases.domain.usecase
 
-import com.example.eventsnowcielo.features.purchases.data.TicketPrinterManager
+import com.example.eventsnowcielo.features.purchases.data.repository.TicketPrinterRepositoryImpl
 import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import io.mockk.every
@@ -17,7 +17,7 @@ import org.junit.Test
 
 class PrintTicketUseCaseImplTest {
 
-    private lateinit var ticketPrinterManager: TicketPrinterManager
+    private lateinit var ticketPrinterManager: TicketPrinterRepositoryImpl
     private lateinit var printTicketUseCase: PrintTicketUseCaseImpl
 
     private val sampleTicket = Ticket(

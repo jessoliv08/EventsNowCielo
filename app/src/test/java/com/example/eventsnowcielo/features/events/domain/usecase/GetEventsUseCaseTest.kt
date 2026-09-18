@@ -3,7 +3,7 @@ package com.example.eventsnowcielo.features.events.domain.usecase
 import com.example.eventsnowcielo.features.events.domain.model.Category
 import com.example.eventsnowcielo.features.events.domain.model.Event
 import com.example.eventsnowcielo.features.events.domain.repository.EventRepository
-import com.example.eventsnowcielo.features.events.ui.EventFilterState
+import com.example.eventsnowcielo.features.events.domain.model.EventFilterState
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

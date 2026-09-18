@@ -1,10 +1,12 @@
-package com.example.eventsnowcielo.features.events.ui
+package com.example.eventsnowcielo.features.events.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
 import com.example.eventsnowcielo.features.events.domain.model.Category
 import com.example.eventsnowcielo.features.events.domain.model.Event
+import com.example.eventsnowcielo.features.events.domain.model.EventFilterState
+import com.example.eventsnowcielo.features.events.domain.model.EventListUiState
 import com.example.eventsnowcielo.features.events.domain.usecase.GetEventsUseCase
 import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +44,7 @@ class EventListViewModel(
         .getCompletedOrdersCount()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Companion.WhileSubscribed(5_000),
             initialValue = 0
         )
 

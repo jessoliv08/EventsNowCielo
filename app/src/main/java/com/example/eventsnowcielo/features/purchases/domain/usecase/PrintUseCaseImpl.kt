@@ -1,8 +1,8 @@
 package com.example.eventsnowcielo.features.purchases.domain.usecase
 
-import com.example.eventsnowcielo.features.purchases.data.TicketPrinterManager
 import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.repository.TicketPrinterRepository
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import java.text.NumberFormat
@@ -10,19 +10,19 @@ import java.util.Locale
 
 @Single(binds = [PrintTicketUseCase::class])
 class PrintTicketUseCaseImpl(
-    private val ticketPrinterManager: TicketPrinterManager
+    private val ticketPrinterRepository: TicketPrinterRepository
 ): PrintTicketUseCase {
-    override val printState: StateFlow<PrintResult?> = ticketPrinterManager.printState
+    override val printState: StateFlow<PrintResult?> = ticketPrinterRepository.printState
 
     override operator fun invoke(ticket: Ticket) {
         val alignCenter = HashMap<String, Int>().apply {
             put("align", 1) // 1 = Center alignment in Cielo SDK
         }
-        ticketPrinterManager.printTicket(ticket.toHumanReadableString(), alignCenter)
+        ticketPrinterRepository.printTicket(ticket.toHumanReadableString(), alignCenter)
     }
 
     override fun dismissResult() {
-        ticketPrinterManager.dismissResult()
+        ticketPrinterRepository.dismissResult()
     }
 }
 

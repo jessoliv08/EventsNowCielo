@@ -1,10 +1,13 @@
-package com.example.eventsnowcielo.features.payment.data
+package com.example.eventsnowcielo.features.payment.data.source
 
 import cielo.orders.domain.CheckoutRequest
+import cielo.orders.domain.Order
 import cielo.sdk.order.payment.PaymentCode
 import cielo.sdk.order.payment.PaymentError
 import cielo.sdk.order.payment.PaymentListener
 import com.example.eventsnowcielo.features.cart.domain.model.CartItem
+import com.example.eventsnowcielo.features.payment.data.OrderManagerConnector
+import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.data.repository.toOrderItemModel
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import kotlinx.coroutines.channels.awaitClose
@@ -93,7 +96,7 @@ class CieloLioDataSource(
                 trySend(PaymentResult.InProgress())
             }
 
-            override fun onPayment(paidOrder: cielo.orders.domain.Order) {
+            override fun onPayment(paidOrder: Order) {
                 val transactionId = paidOrder.payments
                     .firstOrNull()
                     ?.paymentFields

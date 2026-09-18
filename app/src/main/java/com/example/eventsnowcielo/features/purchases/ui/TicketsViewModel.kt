@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
 import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.model.TicketsUiState
 import com.example.eventsnowcielo.features.purchases.domain.usecase.PrintTicketUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

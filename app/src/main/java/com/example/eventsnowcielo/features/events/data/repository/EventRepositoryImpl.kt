@@ -1,5 +1,6 @@
-package com.example.eventsnowcielo.features.events.data
+package com.example.eventsnowcielo.features.events.data.repository
 
+import com.example.eventsnowcielo.features.events.data.source.EventRemoteDataSource
 import com.example.eventsnowcielo.features.events.domain.model.Event
 import com.example.eventsnowcielo.features.events.domain.repository.EventRepository
 import org.koin.core.annotation.Single

@@ -1,4 +1,4 @@
-package com.example.eventsnowcielo.features.payment.data
+package com.example.eventsnowcielo.features.payment.domain.model
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle

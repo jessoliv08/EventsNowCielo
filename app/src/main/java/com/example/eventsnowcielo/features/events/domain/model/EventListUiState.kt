@@ -1,6 +1,4 @@
-package com.example.eventsnowcielo.features.events.ui
-
-import com.example.eventsnowcielo.features.events.domain.model.Event
+package com.example.eventsnowcielo.features.events.domain.model
 
 sealed interface EventListUiState {
     data object Loading : EventListUiState

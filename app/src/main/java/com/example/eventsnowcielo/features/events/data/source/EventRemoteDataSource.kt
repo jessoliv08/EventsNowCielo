@@ -1,4 +1,4 @@
-package com.example.eventsnowcielo.features.events.data
+package com.example.eventsnowcielo.features.events.data.source
 
 import com.example.eventsnowcielo.features.events.data.remote.EventApi
 import com.example.eventsnowcielo.features.events.data.remote.dto.toDomain

@@ -1,8 +1,9 @@
-package com.example.eventsnowcielo.features.events.ui
+package com.example.eventsnowcielo.features.events.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
+import com.example.eventsnowcielo.features.events.domain.model.EventDetailUiState
 import com.example.eventsnowcielo.features.events.domain.usecase.GetEventByIdUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

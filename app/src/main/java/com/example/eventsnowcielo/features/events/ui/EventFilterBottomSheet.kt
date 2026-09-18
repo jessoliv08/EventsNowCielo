@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.eventsnowcielo.core.ui.util.formatPriceInCents
 import com.example.eventsnowcielo.features.events.domain.model.Category
+import com.example.eventsnowcielo.features.events.domain.model.EventFilterState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToLong

@@ -1,7 +1,7 @@
 package com.example.eventsnowcielo.features.payment.domain.repository
 
 import com.example.eventsnowcielo.features.cart.domain.model.CartItem
-import com.example.eventsnowcielo.features.payment.data.PaymentResult
+import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import kotlinx.coroutines.flow.Flow
 
