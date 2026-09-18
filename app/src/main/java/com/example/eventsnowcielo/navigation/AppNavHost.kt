@@ -13,6 +13,7 @@ import com.example.eventsnowcielo.features.events.ui.EventDetailScreen
 import com.example.eventsnowcielo.features.events.ui.EventListScreen
 import com.example.eventsnowcielo.features.payment.ui.PaymentScreen
 import com.example.eventsnowcielo.features.payment.ui.PaymentViewModel
+import com.example.eventsnowcielo.features.purchases.ui.TicketsScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -28,6 +29,9 @@ fun AppNavHost(modifier: Modifier = Modifier) {
             EventListScreen(
                 onEventClick = { eventId ->
                     navController.navigate(Screen.EventDetail.createRoute(eventId))
+                },
+                onTicketsClick = {
+                    navController.navigate(Screen.Tickets.route)
                 },
                 onCartClick = {
                     navController.navigate(Screen.Cart.route)
@@ -47,6 +51,12 @@ fun AppNavHost(modifier: Modifier = Modifier) {
                 eventId = eventId,
                 onBackClick = { navController.popBackStack() },
                 viewModel = koinViewModel(viewModelStoreOwner = backStackEntry)
+            )
+        }
+
+        composable(Screen.Tickets.route) {
+            TicketsScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
 

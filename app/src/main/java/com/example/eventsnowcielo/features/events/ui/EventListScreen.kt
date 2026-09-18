@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -37,17 +38,28 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun EventListScreen(
     onEventClick: (String) -> Unit,
+    onTicketsClick: () -> Unit,
     onCartClick: () -> Unit,
     viewModel: EventListViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val cartItemCount by viewModel.cartItemCount.collectAsState()
+    val completedOrdersCount by viewModel.completedOrdersCount.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Events Now") },
                 actions = {
+                    if (completedOrdersCount > 0) {
+                        IconButton(onClick = onTicketsClick) {
+                            Icon(
+                                imageVector = Icons.Default.ConfirmationNumber,
+                                contentDescription = "My Tickets"
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onCartClick) {
                         if (cartItemCount > 0) {
                             BadgedBox(

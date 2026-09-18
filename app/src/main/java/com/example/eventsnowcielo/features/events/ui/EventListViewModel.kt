@@ -4,16 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
 import com.example.eventsnowcielo.features.events.domain.usecase.GetEventsUseCase
+import com.example.eventsnowcielo.features.purchases.domain.PurchasesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class EventListViewModel(
     private val getEventsUseCase: GetEventsUseCase,
-    private val cartRepository: CartRepository
+    private val cartRepository: CartRepository,
+    purchasesRepository: PurchasesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<EventListUiState>(EventListUiState.Loading)
@@ -21,6 +25,14 @@ class EventListViewModel(
 
     private val _cartItemCount = MutableStateFlow(0)
     val cartItemCount: StateFlow<Int> = _cartItemCount.asStateFlow()
+
+    val completedOrdersCount: StateFlow<Int> = purchasesRepository
+        .getCompletedOrdersCount()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = 0
+        )
 
     init {
         loadEvents()

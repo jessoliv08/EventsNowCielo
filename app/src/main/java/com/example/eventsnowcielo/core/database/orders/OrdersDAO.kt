@@ -29,6 +29,9 @@ interface OrderDao {
     )
     fun getPastOrders(status: String, today: String): Flow<List<OrderEntity>>
 
+    @Query("SELECT COUNT(*) FROM orders WHERE status = :status")
+    fun getCompletedOrdersCount(status: String): Flow<Int>
+
     @Query(
         """
         UPDATE orders
