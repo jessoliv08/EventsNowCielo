@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
 import com.example.eventsnowcielo.features.events.domain.usecase.GetEventsUseCase
-import com.example.eventsnowcielo.features.purchases.domain.PurchasesRepository
+import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

@@ -29,8 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 import org.koin.androidx.compose.koinViewModel
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketsScreen(
@@ -38,14 +38,6 @@ fun TicketsScreen(
     viewModel: TicketsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(uiState.printMessage) {
-        uiState.printMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
-            viewModel.dismissPrintMessage()
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -61,7 +53,6 @@ fun TicketsScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         when {
             uiState.isLoading -> {
@@ -93,17 +84,28 @@ fun TicketsScreen(
             }
 
             else -> {
-                LazyColumn(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(padding)
                 ) {
-                    items(uiState.tickets, key = { it.id }) { ticket ->
-                        TicketCard(
-                            ticket = ticket,
-                            onPrintClick = { viewModel.printTicket(ticket) }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(), // Removed .padding(padding) duplicate here
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(uiState.tickets, key = { it.id }) { ticket ->
+                            TicketCard(
+                                ticket = ticket,
+                                onPrintClick = { viewModel.printTicket(ticket) }
+                            )
+                        }
+                    }
+
+                    uiState.printResult?.let {
+                        PrintResultDialog(
+                            printResult = it,
+                            onDismiss = viewModel::dismissPrintMessage
                         )
                     }
                 }

@@ -1,4 +1,4 @@
-package com.example.eventsnowcielo.features.purchases.domain
+package com.example.eventsnowcielo.features.purchases.domain.model
 
 data class Ticket(
     val id: Long,

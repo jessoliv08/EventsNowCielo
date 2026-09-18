@@ -22,7 +22,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.eventsnowcielo.core.ui.util.formatPriceInCents
-import com.example.eventsnowcielo.features.purchases.domain.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 
 @Composable
 fun TicketCard(

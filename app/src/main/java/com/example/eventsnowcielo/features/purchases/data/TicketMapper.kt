@@ -1,7 +1,7 @@
 package com.example.eventsnowcielo.features.purchases.data
 
 import com.example.eventsnowcielo.core.database.orders.OrderEntity
-import com.example.eventsnowcielo.features.purchases.domain.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

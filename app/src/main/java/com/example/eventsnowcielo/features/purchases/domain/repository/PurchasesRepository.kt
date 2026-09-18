@@ -1,5 +1,6 @@
-package com.example.eventsnowcielo.features.purchases.domain
+package com.example.eventsnowcielo.features.purchases.domain.repository
 
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import kotlinx.coroutines.flow.Flow
 
 interface PurchasesRepository {

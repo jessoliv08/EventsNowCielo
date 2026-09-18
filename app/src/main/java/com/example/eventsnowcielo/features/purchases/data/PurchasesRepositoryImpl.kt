@@ -2,8 +2,8 @@ package com.example.eventsnowcielo.features.purchases.data
 
 import com.example.eventsnowcielo.core.database.orders.OrderDao
 import com.example.eventsnowcielo.features.payment.data.repository.PaymentRepositoryImpl
-import com.example.eventsnowcielo.features.purchases.domain.PurchasesRepository
-import com.example.eventsnowcielo.features.purchases.domain.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map

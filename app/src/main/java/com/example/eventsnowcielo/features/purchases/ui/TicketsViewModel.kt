@@ -2,30 +2,32 @@ package com.example.eventsnowcielo.features.purchases.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eventsnowcielo.features.purchases.domain.PurchasesRepository
-import com.example.eventsnowcielo.features.purchases.domain.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
+import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.usecase.PrintTicketUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class TicketsViewModel(
-    private val purchasesRepository: PurchasesRepository
+    private val purchasesRepository: PurchasesRepository,
+    private val printTicketUseCase: PrintTicketUseCase
 ) : ViewModel() {
-
-    private val printFeedback = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<TicketsUiState> = combine(
         purchasesRepository.getCompletedTickets(),
-        printFeedback
+        printTicketUseCase.printState
     ) { tickets, printMessage ->
         TicketsUiState(
             tickets = tickets,
             isLoading = false,
-            printMessage = printMessage
+            printResult = printMessage
         )
     }.stateIn(
         scope = viewModelScope,
@@ -35,10 +37,12 @@ class TicketsViewModel(
 
     fun printTicket(ticket: Ticket) {
         if (ticket.isPastEvent) return
-        printFeedback.value = "Printing ${ticket.quantity} ticket(s) for \"${ticket.title}\"..."
+        viewModelScope.launch {
+            printTicketUseCase.invoke(ticket)
+        }
     }
 
     fun dismissPrintMessage() {
-        printFeedback.value = null
+        printTicketUseCase.dismissResult()
     }
 }
