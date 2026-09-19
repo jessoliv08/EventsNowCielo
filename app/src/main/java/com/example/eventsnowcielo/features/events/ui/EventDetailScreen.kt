@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.eventsnowcielo.core.ui.util.formatPriceInCents
+import com.example.eventsnowcielo.features.events.domain.model.Event
 import com.example.eventsnowcielo.features.events.ui.viewmodel.EventDetailViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -81,7 +82,7 @@ fun EventDetailScreen(
             )
         },
         bottomBar = {
-            uiState.event?.let { event ->
+            if (!uiState.isPast) {
                 EventDetailBottomBar(
                     quantity = uiState.quantity,
                     onIncrement = viewModel::incrementQuantity,
@@ -116,22 +117,21 @@ fun EventDetailScreen(
                     )
                 }
             }
-
-            uiState.event != null -> {
-                EventDetailContent(
-                    event = uiState.event!!,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                )
-            }
+        }
+        uiState.event?.let {
+            EventDetailContent(
+                event = it,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            )
         }
     }
 }
 
 @Composable
 private fun EventDetailContent(
-    event: com.example.eventsnowcielo.features.events.domain.model.Event,
+    event: Event,
     modifier: Modifier = Modifier
 ) {
     Column(

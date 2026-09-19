@@ -231,17 +231,17 @@ private fun QuickViewChip(
 }
 
 private enum class DatePreset(val label: String) {
+    TODAY("Today"),
+    TOMORROW("Tomorrow"),
     THIS_WEEK("This Week"),
-    THIS_MONTH("This Month"),
-    NEXT_MONTH("Next 30 Days"),
-    NEXT_3_MONTHS("Next 3 Months");
+    THIS_MONTH("This Month");
 
     fun toDateRange(today: LocalDate): Pair<LocalDate, LocalDate> {
         return when (this) {
+            TODAY -> today to today
+            TOMORROW -> today.plusDays(1) to today.plusDays(1)
             THIS_WEEK -> today to today.plusDays(7)
             THIS_MONTH -> today.withDayOfMonth(1) to today.withDayOfMonth(today.lengthOfMonth())
-            NEXT_MONTH -> today to today.plusDays(30)
-            NEXT_3_MONTHS -> today to today.plusMonths(3)
         }
     }
 }

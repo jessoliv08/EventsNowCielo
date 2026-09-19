@@ -102,4 +102,6 @@ Install the Cielo LIO Emulator on the test device to exercise checkout flows:
 ## Future Improvements (With More Time)
 * UI & Instrumented Tests: Implement UI testing using Compose Testing API and end-to-end integration tests for purchasing workflows.
 * Offline-First Capabilities with Room: Implement full offline caching strategy where local Room data serves as the single source of truth, synchronizing when network availability changes.
+* API & Pagination: Add support for server-side pagination and date filtering on the events endpoint. Integrate Android’s Paging 3 library into the Events screen to handle infinite scrolling smoothly.
+* Filter & Search UX: Implement ticket filtering options and display dates prominently at the top of the event listing.
 * CI/CD Pipeline: Set up GitHub Actions for automated unit test execution and static code analysis on every Pull Request.

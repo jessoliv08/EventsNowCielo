@@ -7,6 +7,7 @@ data class Category(
 
 data class EventDetailUiState(
     val event: Event? = null,
+    val isPast: Boolean = false,
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
     val quantity: Int = 0,

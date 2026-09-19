@@ -26,9 +26,14 @@ class EventDetailViewModel(
             _uiState.value = EventDetailUiState(isLoading = true)
 
             getEventByIdUseCase(eventId)
-                .onSuccess { event ->
+                .onSuccess { result ->
                     _uiState.update {
-                        it.copy(event = event, isLoading = false, errorMessage = null)
+                        it.copy(
+                            event = result.first,
+                            isPast = result.second,
+                            isLoading = false,
+                            errorMessage = null
+                        )
                     }
                 }
                 .onFailure { error ->
