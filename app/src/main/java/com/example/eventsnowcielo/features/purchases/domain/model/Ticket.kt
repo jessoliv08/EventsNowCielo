@@ -2,7 +2,7 @@ package com.example.eventsnowcielo.features.purchases.domain.model
 
 data class Ticket(
     val id: Long,
-    val orderId: String,
+    val paymentId: Long,
     val eventId: String,
     val title: String,
     val date: String,
@@ -10,6 +10,19 @@ data class Ticket(
     val quantity: Int,
     val unitPriceInCents: Long,
     val totalAmountInCents: Long,
-    val transactionId: String?,
-    val isPastEvent: Boolean
+    val isPastEvent: Boolean,
+)
+
+data class Payment(
+    val orderId: String?,
+    val transactionId: String? = null,
+    val paymentCode: String? = null,
+    val email: String? = null,
+    val ec: String? = null,
+    val installments: Int = 1,
+)
+
+data class PaymentWithTickets(
+    val payment: Payment,
+    val tickets: List<Ticket>
 )

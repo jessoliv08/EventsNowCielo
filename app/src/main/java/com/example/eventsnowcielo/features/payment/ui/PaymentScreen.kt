@@ -42,6 +42,7 @@ import com.example.eventsnowcielo.core.ui.util.formatPriceInCents
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentType
+import com.example.eventsnowcielo.features.purchases.domain.model.PaymentWithTickets
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import com.example.eventsnowcielo.features.purchases.ui.PrintResultDialog
 import com.example.eventsnowcielo.features.purchases.ui.ReceiptDialog
@@ -321,8 +322,8 @@ private fun PaymentTypeDropdown(
 @Composable
 private fun PaymentResultDialog(
     paymentResult: PaymentResult,
-    onPrintTickets: (List<Ticket>) -> Unit,
-    onShowReceipt: (List<Ticket>) -> Unit,
+    onPrintTickets: (PaymentWithTickets) -> Unit,
+    onShowReceipt: (PaymentWithTickets) -> Unit,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {

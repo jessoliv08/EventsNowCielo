@@ -102,5 +102,4 @@ Install the Cielo LIO Emulator on the test device to exercise checkout flows:
 ## Future Improvements (With More Time)
 * UI & Instrumented Tests: Implement UI testing using Compose Testing API and end-to-end integration tests for purchasing workflows.
 * Offline-First Capabilities with Room: Implement full offline caching strategy where local Room data serves as the single source of truth, synchronizing when network availability changes.
-* Complete Cielo LIO Payment Checkout: Integrate full credit/debit card processing via OrderManager before triggering ticket printing.
 * CI/CD Pipeline: Set up GitHub Actions for automated unit test execution and static code analysis on every Pull Request.

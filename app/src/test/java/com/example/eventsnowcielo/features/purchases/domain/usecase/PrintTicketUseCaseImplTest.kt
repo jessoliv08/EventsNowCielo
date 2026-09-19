@@ -51,7 +51,7 @@ class PrintTicketUseCaseImplTest {
         } just runs
 
         // When
-        printTicketUseCase.printTicket(sampleTicket)
+        printTicketUseCase.printTickets(sampleTicket)
 
         // Then
         verify(exactly = 1) {

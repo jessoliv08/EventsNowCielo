@@ -2,7 +2,7 @@ package com.example.eventsnowcielo.features.purchases.data
 
 import app.cash.turbine.test
 import com.example.eventsnowcielo.core.database.orders.OrderDao
-import com.example.eventsnowcielo.core.database.orders.OrderEntity
+import com.example.eventsnowcielo.core.database.orders.entity.OrderEntity
 import com.example.eventsnowcielo.features.payment.data.repository.PaymentRepositoryImpl
 import com.example.eventsnowcielo.features.purchases.data.repository.PurchasesRepositoryImpl
 import io.mockk.every

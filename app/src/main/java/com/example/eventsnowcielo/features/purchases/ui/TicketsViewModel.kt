@@ -46,7 +46,9 @@ class TicketsViewModel(
     }
 
     fun showReceipt(ticket: Ticket) {
-        _selectedReceiptTicket.value = printTicketUseCase.ticketReceipt(ticket)
+        viewModelScope.launch {
+            _selectedReceiptTicket.value = printTicketUseCase.ticketReceipt(ticket)
+        }
     }
 
     fun dismissPrintMessage() {

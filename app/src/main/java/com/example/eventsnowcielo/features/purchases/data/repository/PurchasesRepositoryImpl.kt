@@ -2,7 +2,9 @@ package com.example.eventsnowcielo.features.purchases.data.repository
 
 import com.example.eventsnowcielo.core.database.orders.OrderDao
 import com.example.eventsnowcielo.features.payment.data.repository.PaymentRepositoryImpl
+import com.example.eventsnowcielo.features.purchases.data.toPaymentWithTickets
 import com.example.eventsnowcielo.features.purchases.data.toTicket
+import com.example.eventsnowcielo.features.purchases.domain.model.PaymentWithTickets
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
 import kotlinx.coroutines.flow.Flow
@@ -22,17 +24,39 @@ class PurchasesRepositoryImpl(
 
         return combine(
             orderDao.getUpcomingOrders(
-                PaymentRepositoryImpl.Companion.ORDER_STATUS_COMPLETED,
+                PaymentRepositoryImpl.ORDER_STATUS_COMPLETED,
                 today
             ),
-            orderDao.getPastOrders(PaymentRepositoryImpl.Companion.ORDER_STATUS_COMPLETED, today)
-        ) { upcoming, past ->
-            upcoming.map { it.toTicket(todayDate) } + past.map { it.toTicket(todayDate) }
+            orderDao.getPastOrders(
+                PaymentRepositoryImpl.ORDER_STATUS_COMPLETED,
+                today
+            )
+        ) { upcomingPayments, pastPayments ->
+            val upcomingTickets = upcomingPayments.flatMap { paymentWithOrders ->
+                paymentWithOrders.orders.map { order ->
+                    order.toTicket(todayDate)
+                }
+            }
+
+            val pastTickets = pastPayments.flatMap { paymentWithOrders ->
+                paymentWithOrders.orders.map { order ->
+                    order.toTicket(todayDate)
+                }
+            }
+
+            upcomingTickets + pastTickets
         }
     }
 
+    override suspend fun getPaymentByTicket(ticket: Ticket): PaymentWithTickets? {
+        return orderDao.getPaymentWithOrdersByPaymentId(
+            paymentId = ticket.paymentId,
+            ticketId = ticket.id
+        )?.toPaymentWithTickets()
+    }
+
     override fun getCompletedOrdersCount(): Flow<Int> {
-        return orderDao.getCompletedOrdersCount(PaymentRepositoryImpl.Companion.ORDER_STATUS_COMPLETED)
+        return orderDao.getCompletedOrdersCount(PaymentRepositoryImpl.ORDER_STATUS_COMPLETED)
     }
 
     private fun todayString(): String {

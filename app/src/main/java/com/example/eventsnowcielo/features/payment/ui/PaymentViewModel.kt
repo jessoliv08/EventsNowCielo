@@ -7,7 +7,7 @@ import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentType
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentUiState
 import com.example.eventsnowcielo.features.payment.domain.usecase.ProcessPaymentUseCase
-import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.model.PaymentWithTickets
 import com.example.eventsnowcielo.features.purchases.domain.usecase.PrintTicketUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -103,13 +103,13 @@ class PaymentViewModel(
         printTicketUseCase.dismissResult()
     }
 
-    fun printTicket(tickets: List<Ticket>) {
+    fun printTicket(tickets: PaymentWithTickets) {
         viewModelScope.launch {
             printTicketUseCase.printTickets(tickets)
         }
     }
 
-    fun showReceipt(tickets: List<Ticket>) {
+    fun showReceipt(tickets: PaymentWithTickets) {
         _uiState.update { currentState ->
             currentState.copy(
                 receiptMessage = printTicketUseCase.ticketsReceipt(tickets)

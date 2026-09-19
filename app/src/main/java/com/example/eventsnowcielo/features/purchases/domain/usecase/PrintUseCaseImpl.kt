@@ -1,8 +1,10 @@
 package com.example.eventsnowcielo.features.purchases.domain.usecase
 
 import com.example.eventsnowcielo.core.ui.util.formatPriceInCents
+import com.example.eventsnowcielo.features.purchases.domain.model.PaymentWithTickets
 import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
 import com.example.eventsnowcielo.features.purchases.domain.repository.TicketPrinterRepository
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
@@ -11,34 +13,39 @@ import java.util.Locale
 
 @Single(binds = [PrintTicketUseCase::class])
 class PrintTicketUseCaseImpl(
-    private val ticketPrinterRepository: TicketPrinterRepository
+    private val ticketPrinterRepository: TicketPrinterRepository,
+    private val purchasesRepository: PurchasesRepository
 ): PrintTicketUseCase {
     override val printState: StateFlow<PrintResult?> = ticketPrinterRepository.printState
 
-    override fun printTicket(ticket: Ticket) {
+    override fun printTickets(paymentWithTickets: PaymentWithTickets) {
         val alignCenter = HashMap<String, Int>().apply {
             put("align", 1) // 1 = Center alignment in Cielo SDK
         }
-        ticketPrinterRepository.printTicket(ticket.toHumanReadableString(), alignCenter)
+        ticketPrinterRepository.printTicket(ticketsReceipt(paymentWithTickets), alignCenter)
     }
 
-    override fun printTickets(tickets: List<Ticket>) {
+    override suspend fun printTicket(ticket: Ticket) {
         val alignCenter = HashMap<String, Int>().apply {
             put("align", 1) // 1 = Center alignment in Cielo SDK
         }
-        ticketPrinterRepository.printTicket(ticketsReceipt(tickets), alignCenter)
+        ticketPrinterRepository.printTicket(
+            information = ticketReceipt(ticket),
+            alignCenter
+        )
     }
 
     override fun dismissResult() {
         ticketPrinterRepository.dismissResult()
     }
 
-    override fun ticketReceipt(ticket: Ticket): String {
-        return ticket.toHumanReadableString()
+    override suspend fun ticketReceipt(ticket: Ticket): String {
+        return purchasesRepository.getPaymentByTicket(ticket)?.let {
+            ticketsReceipt(it)
+        } ?: "Some error while processing Receipt"
     }
 
-    override fun ticketsReceipt(tickets: List<Ticket>): String {
-        if (tickets.isEmpty()) return "NO TICKETS FOUND"
+    override fun ticketsReceipt(paymentWithTickets: PaymentWithTickets): String {
 
         return buildString {
             appendLine("======================================")
@@ -46,19 +53,30 @@ class PrintTicketUseCaseImpl(
             appendLine("======================================")
             appendLine()
 
-            tickets.forEachIndexed { index, ticket ->
+            paymentWithTickets.tickets.forEachIndexed { index, ticket ->
                 appendLine("TICKET #${index + 1}")
                 appendLine(ticket.toHumanReadableString())
-                if (index < tickets.lastIndex) {
+                if (index < paymentWithTickets.tickets.lastIndex) {
                     appendLine("======================================")
                     appendLine()
                 }
             }
-
             appendLine()
             appendLine("======================================")
-            appendLine("TOTAL TICKETS: ${tickets.size}")
-            val grandTotalInCents = tickets.sumOf { it.totalAmountInCents }
+            appendLine()
+            appendLine("Payment Information:")
+            appendLine("Order ID: ${paymentWithTickets.payment.orderId}")
+            appendLine("Transaction ID: ${paymentWithTickets.payment.transactionId}")
+            appendLine("Payment chosen: ${paymentWithTickets.payment.paymentCode}")
+            if (paymentWithTickets.payment.installments > 1) {
+                appendLine("Payment installments: ${paymentWithTickets.payment.installments}")
+            }
+            appendLine("EC: ${paymentWithTickets.payment.ec}")
+            appendLine("Email: ${paymentWithTickets.payment.email}")
+            appendLine()
+            appendLine("======================================")
+            appendLine("TOTAL TICKETS: ${paymentWithTickets.tickets.size}")
+            val grandTotalInCents = paymentWithTickets.tickets.sumOf { it.totalAmountInCents }
             appendLine("GRAND TOTAL: ${formatPriceInCents(grandTotalInCents)}")
             appendLine("======================================")
         }
@@ -83,10 +101,6 @@ fun Ticket.toHumanReadableString(): String {
         Quantity: $quantity ticket(s)
         Unit Price: $unitPriceFormatted
         Total Paid: $totalAmountFormatted
-        
-        ----------------------------------------
-        Order ID: $orderId
-        ${transactionId?.let { "Transaction ID: $it" } ?: "Transaction ID: N/A"}
         ======================================
     """.trimIndent()
 }
