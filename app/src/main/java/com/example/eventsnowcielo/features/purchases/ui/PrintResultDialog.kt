@@ -1,10 +1,14 @@
 package com.example.eventsnowcielo.features.purchases.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -14,6 +18,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 
@@ -22,6 +27,8 @@ fun PrintResultDialog(
     printResult: PrintResult,
     onDismiss: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
     AlertDialog(
         onDismissRequest = {
             if (printResult !is PrintResult.InProgress) {
@@ -64,13 +71,36 @@ fun PrintResultDialog(
                     text = printResult.message,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                if (printResult is PrintResult.Error) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = printResult.errorMessage,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                when (printResult) {
+                    is PrintResult.Error -> {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = printResult.errorMessage,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                    is PrintResult.Success -> {
+                        printResult.resultTicket?.let {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 350.dp)
+                                    .verticalScroll(scrollState),
+                                contentAlignment = Alignment.TopStart
+                            ) {
+                                Text(
+                                    text = printResult.resultTicket,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontFamily = FontFamily.Monospace
+                                    ),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                    else -> {}
                 }
             }
         },

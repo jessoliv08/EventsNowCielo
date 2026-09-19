@@ -3,12 +3,14 @@ package com.example.eventsnowcielo.features.payment.domain.usecase
 import app.cash.turbine.test
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.data.repository.PaymentRepositoryImpl
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -99,6 +101,40 @@ class ProcessPaymentUseCaseImplTest {
         processPaymentUseCase(orderId, paymentCode, email, ec).test {
             assertTrue(awaitItem() is PaymentResult.InProgress)
             assertTrue(awaitItem() is PaymentResult.Cancelled)
+            awaitComplete()
+        }
+
+        verify(exactly = 1) {
+            repository.checkout(orderId, paymentCode, email, ec)
+        }
+    }
+
+    @Test
+    fun `invoke should emit Success with ticket when repository checkout emits successful payment`() = runTest {
+        // Given
+        val mockTicket = mockk<Ticket>()
+
+        every {
+            repository.checkout(orderId, paymentCode, email, ec)
+        } returns flowOf(
+            PaymentResult.InProgress(),
+            PaymentResult.Success(
+                transactionId = null,
+                tickets = mockTicket
+            )
+        )
+
+        // When / Then
+        processPaymentUseCase(orderId, paymentCode, email, ec).test {
+            assertTrue(awaitItem() is PaymentResult.InProgress)
+
+            val success = awaitItem()
+            assertTrue(success is PaymentResult.Success)
+
+            val successResult = success as PaymentResult.Success
+            assertNull(successResult.transactionId)
+            assertEquals(mockTicket, successResult.tickets)
+
             awaitComplete()
         }
 

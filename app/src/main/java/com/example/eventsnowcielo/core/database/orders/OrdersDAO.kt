@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -32,16 +33,19 @@ interface OrderDao {
     @Query("SELECT COUNT(*) FROM orders WHERE status = :status")
     fun getCompletedOrdersCount(status: String): Flow<Int>
 
-    @Query(
-        """
-        UPDATE orders
-        SET status = :status, transactionId = :transactionId
-        WHERE orderId = :orderId
-        """
-    )
-    suspend fun updateOrderStatus(
+    @Query("UPDATE orders SET status = :status, transactionId = :transactionId WHERE orderId = :orderId")
+    suspend fun updateOrderStatus(orderId: String, status: String, transactionId: String?)
+
+    @Query("SELECT * FROM orders WHERE orderId = :orderId")
+    suspend fun getOrdersByOrderId(orderId: String): List<OrderEntity>
+
+    @Transaction
+    suspend fun updateAndGetOrders(
         orderId: String,
         status: String,
         transactionId: String?
-    )
+    ): List<OrderEntity> {
+        updateOrderStatus(orderId, status, transactionId)
+        return getOrdersByOrderId(orderId)
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.eventsnowcielo.features.payment.domain.model
 
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 
 data class PaymentUiState(
     val ec: String = "",
@@ -9,7 +10,8 @@ data class PaymentUiState(
     val selectedPaymentType: PaymentType = PaymentType.CREDIT,
     val createdOrder: OrderModel? = null,
     val isLoading: Boolean = false,
-    val paymentStatusMessage: String? = null,
-    val paymentStatusIconMessage: ImageVector? = null,
-    val checkoutTotalInCents: Long? = null
+    val paymentResult: PaymentResult? = null,
+    val checkoutTotalInCents: Long? = null,
+    val printResult: PrintResult? = null,
+    val receiptMessage: String? = null,
 )

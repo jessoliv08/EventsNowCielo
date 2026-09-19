@@ -43,10 +43,6 @@ class CartRepositoryImpl(
         cartDao.insertOrUpdateItem(existingItem.copy(quantity = quantity))
     }
 
-    override suspend fun clearCart() {
-        cartDao.clearCart()
-    }
-
     override suspend fun getCart(): List<CartItem> {
         return cartDao.getCartItemsSnapshot().map { it.toDomain() }
     }

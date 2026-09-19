@@ -112,15 +112,6 @@ class CartRepositoryImplTest {
     }
 
     @Test
-    fun `clearCart should invoke cart dao clearCart`() = runTest {
-        // When
-        repository.clearCart()
-
-        // Then
-        coVerify(exactly = 1) { cartDao.clearCart() }
-    }
-
-    @Test
     fun `getCart should return mapped snapshot from cart dao`() = runTest {
         // Given
         val entity = sampleEvent.toCartItemEntity(quantity = 4)

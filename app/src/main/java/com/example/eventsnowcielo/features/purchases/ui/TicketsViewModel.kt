@@ -3,7 +3,6 @@ package com.example.eventsnowcielo.features.purchases.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eventsnowcielo.features.purchases.domain.repository.PurchasesRepository
-import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import com.example.eventsnowcielo.features.purchases.domain.model.TicketsUiState
 import com.example.eventsnowcielo.features.purchases.domain.usecase.PrintTicketUseCase
@@ -20,15 +19,18 @@ class TicketsViewModel(
     private val purchasesRepository: PurchasesRepository,
     private val printTicketUseCase: PrintTicketUseCase
 ) : ViewModel() {
+    private val _selectedReceiptTicket = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<TicketsUiState> = combine(
         purchasesRepository.getCompletedTickets(),
-        printTicketUseCase.printState
-    ) { tickets, printMessage ->
+        printTicketUseCase.printState,
+        _selectedReceiptTicket
+    ) { tickets, printMessage, receipt ->
         TicketsUiState(
             tickets = tickets,
             isLoading = false,
-            printResult = printMessage
+            printResult = printMessage,
+            receipt = receipt
         )
     }.stateIn(
         scope = viewModelScope,
@@ -39,11 +41,19 @@ class TicketsViewModel(
     fun printTicket(ticket: Ticket) {
         if (ticket.isPastEvent) return
         viewModelScope.launch {
-            printTicketUseCase.invoke(ticket)
+            printTicketUseCase.printTicket(ticket)
         }
+    }
+
+    fun showReceipt(ticket: Ticket) {
+        _selectedReceiptTicket.value = printTicketUseCase.ticketReceipt(ticket)
     }
 
     fun dismissPrintMessage() {
         printTicketUseCase.dismissResult()
+    }
+
+    fun dismissReceipt() {
+        _selectedReceiptTicket.value = null
     }
 }

@@ -13,7 +13,5 @@ interface CartRepository {
 
     suspend fun updateQuantity(eventId: String, quantity: Int)
 
-    suspend fun clearCart()
-
     suspend fun getCart(): List<CartItem>
 }

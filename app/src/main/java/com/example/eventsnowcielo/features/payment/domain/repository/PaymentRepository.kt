@@ -14,6 +14,5 @@ interface PaymentRepository {
         email: String,
         ec: String
     ): Flow<PaymentResult>
-    suspend fun completeOrder(orderId: String, transactionId: String? = null)
     fun cacheExistingOrder(order: OrderModel)
 }

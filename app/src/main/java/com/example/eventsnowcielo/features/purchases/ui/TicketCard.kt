@@ -28,6 +28,7 @@ import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 fun TicketCard(
     ticket: Ticket,
     onPrintClick: () -> Unit,
+    onShowReceiptClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val cardAlpha = if (ticket.isPastEvent) 0.6f else 1f
@@ -96,15 +97,6 @@ fun TicketCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-                OutlinedButton(
-                    onClick = {},
-                    enabled = false,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp)
-                ) {
-                    Text("Print")
-                }
             } else {
                 Button(
                     onClick = onPrintClick,
@@ -113,6 +105,14 @@ fun TicketCard(
                         .padding(top = 12.dp)
                 ) {
                     Text("Print Ticket")
+                }
+                Button(
+                    onClick = onShowReceiptClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                ) {
+                    Text("Show Receipt")
                 }
             }
         }

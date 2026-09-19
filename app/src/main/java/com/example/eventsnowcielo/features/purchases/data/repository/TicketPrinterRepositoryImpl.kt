@@ -30,7 +30,7 @@ class TicketPrinterRepositoryImpl(context: Context): TicketPrinterRepository {
 
             override fun onPrintSuccess() {
                 Log.d("TicketPrinter", "Print successful")
-                _printState.value = PrintResult.Success()
+                _printState.value = PrintResult.Success(information)
             }
 
             override fun onError(throwable: Throwable?) {

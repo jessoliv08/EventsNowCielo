@@ -16,21 +16,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.eventsnowcielo.features.purchases.domain.model.PrintResult
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import org.koin.androidx.compose.koinViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketsScreen(
@@ -52,64 +49,95 @@ fun TicketsScreen(
                     }
                 }
             )
-        },
+        }
     ) { padding ->
-        when {
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            when {
+                uiState.isLoading -> LoadingStateContent()
+
+                uiState.isEmpty -> EmptyStateContent()
+
+                else -> TicketListContent(
+                    tickets = uiState.tickets,
+                    onPrintClick = viewModel::printTicket,
+                    onShowReceiptClick = viewModel::showReceipt
+                )
             }
 
-            uiState.isEmpty -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No completed tickets yet.\nPurchase events to see them here.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+            // Dialog Overlays
+            uiState.printResult?.let { printResult ->
+                PrintResultDialog(
+                    printResult = printResult,
+                    onDismiss = viewModel::dismissPrintMessage
+                )
             }
 
-            else -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(), // Removed .padding(padding) duplicate here
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(uiState.tickets, key = { it.id }) { ticket ->
-                            TicketCard(
-                                ticket = ticket,
-                                onPrintClick = { viewModel.printTicket(ticket) }
-                            )
-                        }
-                    }
-
-                    uiState.printResult?.let {
-                        PrintResultDialog(
-                            printResult = it,
-                            onDismiss = viewModel::dismissPrintMessage
-                        )
-                    }
-                }
+            uiState.receipt?.let { receipt ->
+                ReceiptDialog(
+                    receipt = receipt,
+                    onDismiss = viewModel::dismissReceipt
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun LoadingStateContent(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun EmptyStateContent(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "No completed tickets yet.\nPurchase events to see them here.",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun TicketListContent(
+    tickets: List<Ticket>,
+    onPrintClick: (Ticket) -> Unit,
+    onShowReceiptClick: (Ticket) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(
+            items = tickets,
+            key = { it.id }
+        ) { ticket ->
+            TicketCard(
+                ticket = ticket,
+                onPrintClick = { onPrintClick(ticket) },
+                onShowReceiptClick = { onShowReceiptClick(ticket) }
+            )
         }
     }
 }

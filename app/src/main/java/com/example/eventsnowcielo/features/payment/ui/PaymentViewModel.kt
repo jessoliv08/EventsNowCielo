@@ -2,14 +2,14 @@ package com.example.eventsnowcielo.features.payment.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.eventsnowcielo.features.cart.domain.repository.CartRepository
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentType
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentUiState
-import com.example.eventsnowcielo.features.payment.domain.usecase.CompleteOrderUseCase
 import com.example.eventsnowcielo.features.payment.domain.usecase.CreateOrderUseCase
 import com.example.eventsnowcielo.features.payment.domain.usecase.ProcessPaymentUseCase
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
+import com.example.eventsnowcielo.features.purchases.domain.usecase.PrintTicketUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,13 +21,20 @@ import org.koin.android.annotation.KoinViewModel
 class PaymentViewModel(
     private val createOrderUseCase: CreateOrderUseCase,
     private val processPaymentUseCase: ProcessPaymentUseCase,
-    private val completeOrderUseCase: CompleteOrderUseCase,
-    private val cartRepository: CartRepository
+    private val printTicketUseCase: PrintTicketUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
 
+    init {
+        // Collect printer state changes and update UI state reactively
+        viewModelScope.launch {
+            printTicketUseCase.printState.collect { printResult ->
+                _uiState.update { it.copy(printResult = printResult) }
+            }
+        }
+    }
     fun onEcChanged(ec: String) {
         _uiState.update { it.copy(ec = ec) }
     }
@@ -54,15 +61,14 @@ class PaymentViewModel(
                 ),
                 checkoutTotalInCents = totalInCents,
                 isLoading = false,
-                paymentStatusMessage = null,
-                paymentStatusIconMessage = null
+                paymentResult = null,
             )
         }
     }
 
     fun createOrder(priceInCents: Long = DEFAULT_UNIT_PRICE_IN_CENTS) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, paymentStatusMessage = null) }
+            _uiState.update { it.copy(isLoading = true, paymentResult = null) }
 
             createOrderUseCase(
                 amount = _uiState.value.selectedQuantity,
@@ -75,7 +81,9 @@ class PaymentViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        paymentStatusMessage = "Failed to create order: ${error.message}"
+                        paymentResult = PaymentResult.Error(
+                            errorMessage = "Failed to create order: ${error.message}"
+                        )
                     )
                 }
             }
@@ -89,9 +97,36 @@ class PaymentViewModel(
                 selectedPaymentType = PaymentType.CREDIT,
                 createdOrder = null,
                 isLoading = false,
-                paymentStatusMessage = null,
-                paymentStatusIconMessage = null,
-                checkoutTotalInCents = null
+                paymentResult = null,
+                checkoutTotalInCents = null,
+                printResult = null,
+                receiptMessage = null,
+            )
+        }
+        printTicketUseCase.dismissResult()
+    }
+
+    fun printTicket(tickets: List<Ticket>) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                selectedQuantity = 1,
+                selectedPaymentType = PaymentType.CREDIT,
+                createdOrder = null,
+                isLoading = false,
+                paymentResult = null,
+                checkoutTotalInCents = null,
+                receiptMessage = null,
+            )
+        }
+        viewModelScope.launch {
+            printTicketUseCase.printTickets(tickets)
+        }
+    }
+
+    fun showReceipt(tickets: List<Ticket>) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                receiptMessage = printTicketUseCase.ticketsReceipt(tickets)
             )
         }
     }
@@ -112,20 +147,16 @@ class PaymentViewModel(
                         _uiState.update {
                             it.copy(
                                 isLoading = true,
-                                paymentStatusIconMessage = status.icon,
+                                paymentResult = status,
                             )
                         }
                     }
 
                     is PaymentResult.Success -> {
-                        completeOrderUseCase(order.id, status.transactionId)
-                        cartRepository.clearCart()
-
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                paymentStatusIconMessage = status.icon,
-                                paymentStatusMessage = status.message,
+                                paymentResult = status,
                                 createdOrder = null
                             )
                         }
@@ -135,8 +166,7 @@ class PaymentViewModel(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                paymentStatusMessage = "${status.message}: ${status.errorMessage}",
-                                paymentStatusIconMessage = status.icon,
+                                paymentResult = status,
                             )
                         }
                     }
@@ -145,8 +175,7 @@ class PaymentViewModel(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                paymentStatusMessage = status.message,
-                                paymentStatusIconMessage = status.icon,
+                                paymentResult = status,
                             )
                         }
                     }

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 
 sealed class PaymentResult(
     open val message: String,
@@ -16,7 +17,8 @@ sealed class PaymentResult(
         override val icon: ImageVector = Icons.Default.ShoppingCart
     ) : PaymentResult(message, icon)
     data class Success(
-        val transactionId: String,
+        val transactionId: String? = null,
+        val tickets: List<Ticket>? = null,
         override val message: String = "Yous payment in completed!",
         override val icon: ImageVector = Icons.Default.CheckCircle
     ) : PaymentResult(message, icon)

@@ -17,6 +17,7 @@ sealed class PrintResult(
     ) : PrintResult(message, icon)
 
     data class Success(
+        val resultTicket: String? = null,
         override val message: String = "Ticket printed successfully!",
         override val icon: ImageVector = Icons.Default.CheckCircle
     ) : PrintResult(message, icon)

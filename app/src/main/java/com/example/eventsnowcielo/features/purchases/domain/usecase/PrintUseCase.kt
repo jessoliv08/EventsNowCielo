@@ -8,7 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 interface PrintTicketUseCase {
     val printState: StateFlow<PrintResult?>
 
-    operator fun invoke(ticket: Ticket)
+    fun printTicket(ticket: Ticket)
+    fun printTickets(tickets: List<Ticket>)
 
     fun dismissResult()
+    fun ticketReceipt(ticket: Ticket): String
+    fun ticketsReceipt(tickets: List<Ticket>): String
 }
