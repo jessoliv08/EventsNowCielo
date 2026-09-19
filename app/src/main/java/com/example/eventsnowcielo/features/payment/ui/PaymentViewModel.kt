@@ -6,7 +6,6 @@ import com.example.eventsnowcielo.features.payment.domain.model.PaymentResult
 import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentType
 import com.example.eventsnowcielo.features.payment.domain.model.PaymentUiState
-import com.example.eventsnowcielo.features.payment.domain.usecase.CreateOrderUseCase
 import com.example.eventsnowcielo.features.payment.domain.usecase.ProcessPaymentUseCase
 import com.example.eventsnowcielo.features.purchases.domain.model.Ticket
 import com.example.eventsnowcielo.features.purchases.domain.usecase.PrintTicketUseCase
@@ -19,7 +18,6 @@ import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
 class PaymentViewModel(
-    private val createOrderUseCase: CreateOrderUseCase,
     private val processPaymentUseCase: ProcessPaymentUseCase,
     private val printTicketUseCase: PrintTicketUseCase,
 ) : ViewModel() {
@@ -43,12 +41,24 @@ class PaymentViewModel(
         _uiState.update { it.copy(email = email) }
     }
 
-    fun onQuantitySelected(quantity: Int) {
-        _uiState.update { it.copy(selectedQuantity = quantity) }
+    fun onPaymentTypeSelected(paymentType: PaymentType) {
+
+        _uiState.update {
+            if (!it.isInstallment()) {
+                it.copy(
+                    selectedPaymentType = paymentType,
+                    selectedInstallment = 1,
+                )
+            } else {
+                it.copy(
+                    selectedPaymentType = paymentType
+                )
+            }
+        }
     }
 
-    fun onPaymentTypeSelected(paymentType: PaymentType) {
-        _uiState.update { it.copy(selectedPaymentType = paymentType) }
+    fun onPaymentInstallmentsSelected(installment: Int) {
+        _uiState.update { it.copy(selectedInstallment = installment) }
     }
 
     fun initializeWithExistingOrder(orderId: String, totalInCents: Long) {
@@ -66,34 +76,21 @@ class PaymentViewModel(
         }
     }
 
-    fun createOrder(priceInCents: Long = DEFAULT_UNIT_PRICE_IN_CENTS) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, paymentResult = null) }
+    fun dismissPrintOnly() {
+        printTicketUseCase.dismissResult()
+    }
 
-            createOrderUseCase(
-                amount = _uiState.value.selectedQuantity,
-                priceInCents = priceInCents
-            ).onSuccess { order ->
-                _uiState.update {
-                    it.copy(isLoading = false, createdOrder = order)
-                }
-            }.onFailure { error ->
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        paymentResult = PaymentResult.Error(
-                            errorMessage = "Failed to create order: ${error.message}"
-                        )
-                    )
-                }
-            }
+    fun dismissReceiptOnly() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                receiptMessage = null
+            )
         }
     }
 
     fun dismiss() {
         _uiState.update { currentState ->
             currentState.copy(
-                selectedQuantity = 1,
                 selectedPaymentType = PaymentType.CREDIT,
                 createdOrder = null,
                 isLoading = false,
@@ -107,17 +104,6 @@ class PaymentViewModel(
     }
 
     fun printTicket(tickets: List<Ticket>) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                selectedQuantity = 1,
-                selectedPaymentType = PaymentType.CREDIT,
-                createdOrder = null,
-                isLoading = false,
-                paymentResult = null,
-                checkoutTotalInCents = null,
-                receiptMessage = null,
-            )
-        }
         viewModelScope.launch {
             printTicketUseCase.printTickets(tickets)
         }
@@ -139,6 +125,7 @@ class PaymentViewModel(
             processPaymentUseCase(
                 orderId = order.id,
                 paymentCode = state.selectedPaymentType.paymentCode,
+                installments = state.selectedInstallment,
                 email = state.email,
                 ec = state.ec
             ).collect { status ->
@@ -182,9 +169,5 @@ class PaymentViewModel(
                 }
             }
         }
-    }
-
-    companion object {
-        private const val DEFAULT_UNIT_PRICE_IN_CENTS = 1000L
     }
 }

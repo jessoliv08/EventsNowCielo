@@ -12,9 +12,10 @@ class ProcessPaymentUseCaseImpl(
     override operator fun invoke(
         orderId: String,
         paymentCode: String,
+        installments: Int,
         email: String,
         ec: String
     ): Flow<PaymentResult> {
-        return repository.checkout(orderId, paymentCode, email, ec)
+        return repository.checkout(orderId, paymentCode, installments, email, ec)
     }
 }

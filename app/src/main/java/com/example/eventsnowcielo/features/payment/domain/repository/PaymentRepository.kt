@@ -6,13 +6,12 @@ import com.example.eventsnowcielo.features.payment.domain.model.OrderModel
 import kotlinx.coroutines.flow.Flow
 
 interface PaymentRepository {
-    suspend fun createOrder(amount: Int, priceInCents: Long): Result<OrderModel?>
     suspend fun createOrderFromCart(cartItems: List<CartItem>): Result<OrderModel?>
     fun checkout(
         orderId: String,
         paymentCode: String,
+        installments: Int,
         email: String,
         ec: String
     ): Flow<PaymentResult>
-    fun cacheExistingOrder(order: OrderModel)
 }

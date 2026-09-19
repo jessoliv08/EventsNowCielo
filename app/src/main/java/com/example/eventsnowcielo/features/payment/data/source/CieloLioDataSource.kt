@@ -88,6 +88,7 @@ class CieloLioDataSource(
         orderId: String,
         amountInCents: Long,
         paymentCode: String,
+        installments: Int,
         email: String,
         ec: String
     ): Flow<PaymentResult> = callbackFlow {
@@ -129,6 +130,7 @@ class CieloLioDataSource(
         val requestBuilder = CheckoutRequest.Builder()
             .orderId(orderId)
             .amount(amountInCents)
+            .installments(installments)
 
         if (email.isNotBlank()) {
             requestBuilder.email(email)
@@ -144,14 +146,16 @@ class CieloLioDataSource(
 
         connector.getOrderManager().checkoutOrder(requestBuilder.build(), paymentListener)
 
-        awaitClose { }
+        awaitClose {
+            unbind()
+        }
     }
 
-    fun unbind() {
+    private fun unbind() {
         connector.unbind()
     }
 
     private fun resolvePaymentCode(paymentCode: String): PaymentCode? {
-        return runCatching { PaymentCode.valueOf(paymentCode) }.getOrNull()
+        return PaymentCode.entries.firstOrNull { it.name.equals(paymentCode, ignoreCase = true) }
     }
 }

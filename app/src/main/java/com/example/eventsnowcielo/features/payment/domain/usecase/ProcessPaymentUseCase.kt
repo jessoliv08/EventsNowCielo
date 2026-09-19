@@ -7,6 +7,7 @@ interface ProcessPaymentUseCase {
     operator fun invoke(
         orderId: String,
         paymentCode: String,
+        installments: Int,
         email: String,
         ec: String
     ): Flow<PaymentResult>

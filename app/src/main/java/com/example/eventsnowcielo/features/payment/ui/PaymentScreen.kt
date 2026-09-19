@@ -86,14 +86,8 @@ fun PaymentScreen(
                 MerchantSetupCard(
                     ec = state.ec,
                     email = state.email,
-                    selectedQuantity = state.selectedQuantity,
-                    isCartCheckout = isCartCheckout,
-                    isLoading = state.isLoading,
-                    hasOrder = state.createdOrder != null,
                     onEcChanged = viewModel::onEcChanged,
                     onEmailChanged = viewModel::onEmailChanged,
-                    onQuantitySelected = viewModel::onQuantitySelected,
-                    onCreateOrder = viewModel::createOrder
                 )
 
                 state.createdOrder?.let { order ->
@@ -102,8 +96,11 @@ fun PaymentScreen(
                         isCartCheckout = isCartCheckout,
                         checkoutTotalInCents = state.checkoutTotalInCents,
                         selectedPaymentType = state.selectedPaymentType,
+                        isInstallment = state.isInstallment(),
+                        selectedInstallment = state.selectedInstallment,
                         isLoading = state.isLoading,
                         onPaymentTypeSelected = viewModel::onPaymentTypeSelected,
+                        onPaymentInstallmentsSelected = viewModel::onPaymentInstallmentsSelected,
                         onExecuteCheckout = viewModel::executeCheckout
                     )
                 }
@@ -114,21 +111,28 @@ fun PaymentScreen(
                     paymentResult = result,
                     onPrintTickets = viewModel::printTicket,
                     onShowReceipt = viewModel::showReceipt,
-                    onDismiss = viewModel::dismiss
+                    onDismiss = {
+                        viewModel.dismiss()
+                        onBackClick()
+                    }
                 )
             }
 
             state.printResult?.let {
                 PrintResultDialog(
                     printResult = it,
-                    onDismiss = viewModel::dismiss
+                    onDismiss = {
+                        viewModel.dismissPrintOnly()
+                    }
                 )
             }
 
             state.receiptMessage?.let {
                 ReceiptDialog(
                     receipt = it,
-                    onDismiss = viewModel::dismiss
+                    onDismiss = {
+                        viewModel.dismissReceiptOnly()
+                    }
                 )
             }
 
@@ -145,14 +149,8 @@ fun PaymentScreen(
 private fun MerchantSetupCard(
     ec: String,
     email: String,
-    selectedQuantity: Int,
-    isCartCheckout: Boolean,
-    isLoading: Boolean,
-    hasOrder: Boolean,
     onEcChanged: (String) -> Unit,
     onEmailChanged: (String) -> Unit,
-    onQuantitySelected: (Int) -> Unit,
-    onCreateOrder: () -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -176,65 +174,6 @@ private fun MerchantSetupCard(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
-
-            if (!isCartCheckout) {
-                QuantityDropdown(
-                    selectedQuantity = selectedQuantity,
-                    onQuantitySelected = onQuantitySelected
-                )
-
-                Button(
-                    onClick = onCreateOrder,
-                    enabled = !isLoading && !hasOrder,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Create Order")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun QuantityDropdown(
-    selectedQuantity: Int,
-    onQuantitySelected: (Int) -> Unit
-) {
-    var qtyExpanded by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.fillMaxWidth()) {
-        OutlinedButton(
-            onClick = { qtyExpanded = true },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.extraSmall
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Quantity: $selectedQuantity")
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Select Quantity"
-                )
-            }
-        }
-
-        DropdownMenu(
-            expanded = qtyExpanded,
-            onDismissRequest = { qtyExpanded = false },
-            modifier = Modifier.fillMaxWidth(0.8f)
-        ) {
-            (1..10).forEach { qty ->
-                DropdownMenuItem(
-                    text = { Text("$qty") },
-                    onClick = {
-                        onQuantitySelected(qty)
-                        qtyExpanded = false
-                    }
-                )
-            }
         }
     }
 }
@@ -245,7 +184,10 @@ private fun ActiveOrderCard(
     isCartCheckout: Boolean,
     checkoutTotalInCents: Long?,
     selectedPaymentType: PaymentType,
+    selectedInstallment: Int,
+    isInstallment: Boolean,
     isLoading: Boolean,
+    onPaymentInstallmentsSelected: (Int) -> Unit,
     onPaymentTypeSelected: (PaymentType) -> Unit,
     onExecuteCheckout: () -> Unit
 ) {
@@ -270,7 +212,10 @@ private fun ActiveOrderCard(
 
             PaymentTypeDropdown(
                 selectedPaymentType = selectedPaymentType,
-                onPaymentTypeSelected = onPaymentTypeSelected
+                selectedInstallment = selectedInstallment,
+                isInstallment = isInstallment,
+                onPaymentTypeSelected = onPaymentTypeSelected,
+                onPaymentInstallmentsSelected = onPaymentInstallmentsSelected
             )
 
             Button(
@@ -287,42 +232,87 @@ private fun ActiveOrderCard(
 @Composable
 private fun PaymentTypeDropdown(
     selectedPaymentType: PaymentType,
-    onPaymentTypeSelected: (PaymentType) -> Unit
+    selectedInstallment: Int,
+    isInstallment: Boolean,
+    onPaymentTypeSelected: (PaymentType) -> Unit,
+    onPaymentInstallmentsSelected: (Int) -> Unit
 ) {
     var payExpanded by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.fillMaxWidth()) {
-        OutlinedButton(
-            onClick = { payExpanded = true },
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.extraSmall
-        ) {
-            Row(
+    var installmentExpanded by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(
+                onClick = { payExpanded = true },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                shape = MaterialTheme.shapes.extraSmall
             ) {
-                Text("Payment: ${selectedPaymentType.label}")
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Select Payment Type"
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Payment: ${selectedPaymentType.label}")
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Select Payment Type"
+                    )
+                }
+            }
+
+            DropdownMenu(
+                expanded = payExpanded,
+                onDismissRequest = { payExpanded = false },
+                modifier = Modifier.fillMaxWidth(0.8f)
+            ) {
+                PaymentType.entries.forEach { type ->
+                    DropdownMenuItem(
+                        text = { Text(type.label) },
+                        onClick = {
+                            onPaymentTypeSelected(type)
+                            payExpanded = false
+                        }
+                    )
+                }
             }
         }
-
-        DropdownMenu(
-            expanded = payExpanded,
-            onDismissRequest = { payExpanded = false },
-            modifier = Modifier.fillMaxWidth(0.8f)
-        ) {
-            PaymentType.entries.forEach { type ->
-                DropdownMenuItem(
-                    text = { Text(type.label) },
-                    onClick = {
-                        onPaymentTypeSelected(type)
-                        payExpanded = false
+        if (isInstallment) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = { installmentExpanded = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.extraSmall
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Installments: ${selectedInstallment}x")
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Select Installments"
+                        )
                     }
-                )
+                }
+
+                DropdownMenu(
+                    expanded = installmentExpanded,
+                    onDismissRequest = { installmentExpanded = false },
+                    modifier = Modifier.fillMaxWidth(0.8f)
+                ) {
+                    (1..12).forEach { installment ->
+                        DropdownMenuItem(
+                            text = { Text("${installment}x") },
+                            onClick = {
+                                onPaymentInstallmentsSelected(installment)
+                                installmentExpanded = false
+                            }
+                        )
+                    }
+                }
             }
         }
     }

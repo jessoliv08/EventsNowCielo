@@ -24,14 +24,6 @@ class PaymentRepositoryImpl(
 
     private val orderAmounts = mutableMapOf<String, Long>()
 
-    override suspend fun createOrder(amount: Int, priceInCents: Long): Result<OrderModel?> {
-        return runCatching {
-            dataSource.createDraftOrder(amount, priceInCents)?.also { order ->
-                cacheOrderAmount(order)
-            }
-        }
-    }
-
     override suspend fun createOrderFromCart(cartItems: List<CartItem>): Result<OrderModel?> {
         return runCatching {
             dataSource.createDraftOrderFromCart(cartItems)?.also { order ->
@@ -44,6 +36,7 @@ class PaymentRepositoryImpl(
     override fun checkout(
         orderId: String,
         paymentCode: String,
+        installments: Int,
         email: String,
         ec: String
     ): Flow<PaymentResult> {
@@ -59,6 +52,7 @@ class PaymentRepositoryImpl(
             orderId = orderId,
             amountInCents = amountInCents,
             paymentCode = paymentCode,
+            installments = installments,
             email = email,
             ec = ec
         ).map { result ->
@@ -95,10 +89,6 @@ class PaymentRepositoryImpl(
         )
         orderAmounts.remove(orderId)
         return orderEntity
-    }
-
-    override fun cacheExistingOrder(order: OrderModel) {
-        cacheOrderAmount(order)
     }
 
     private fun cacheOrderAmount(order: OrderModel) {
